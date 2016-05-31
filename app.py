@@ -6,13 +6,12 @@ app = Flask(__name__)
 def hello_world():
     return 'Flask Dockerized'
 
-@app.route('/metric1', methods=['GET'])
+@app.route('/recall_score', methods=['GET'])
 def metric1():
     y_true = [0, 1, 2, 0, 1, 2]
     y_pred = [0, 2, 1, 0, 0, 1]
     result = recall_score(y_true, y_pred, average='macro')
-    flash('metric1 was successfully caclulated')
-    return 'metric1 was successfully caclulated'
+    return 'recall_score: ' + str(result)
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')
