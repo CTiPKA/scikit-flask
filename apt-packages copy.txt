@@ -1,1 +1,0 @@
-source /opt/ds/bin/activate
