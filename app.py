@@ -1,5 +1,5 @@
 import numpy as np
-from flask import Flask
+from flask import Flask, request, jsonify
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.metrics import recall_score
 app = Flask(__name__)
@@ -87,7 +87,7 @@ def ndcg_score(ground_truth, predictions, k=5):
     return np.mean(scores)
 
 @app.route('/ndcg_score_example', methods=['GET'])
-def metric2():
+def metric2_example():
     """NDCG test call for hardcoded data"""
     ground_truth = [1, 0, 2]
     predictions = [[0.15, 0.55, 0.2], [0.7, 0.2, 0.1], [0.06, 0.04, 0.9]]
@@ -98,48 +98,60 @@ def metric2():
 
     response_dict = {"ndcg_score1" : score1, "ndcg_score2":score2}
 
-    return flask.jsonify(**response_dict)
+    return jsonify(**response_dict)
+
+@app.route('/post_test', methods=['POST'])
+def post_test():
+    """POST data test"""
+        
+    request_json = request.get_json(force=True)
+        
+    ground_truth = request_json['ground_truth']
+    predictions = request_json['predictions']
+    k = request_json['k']
+        
+    response_dict = {"ground_truth":ground_truth,"predictions":predictions,"k":k}
+        
+    return jsonify(**response_dict)
 
 @app.route('/ndcg_score', methods=['GET', 'POST'])
 def metric2():
     if request.method == 'GET':
-        description = "Normalized discounted cumulative gain (NDCG) at rank K. \n"
-        description += "Parameters \n"
-        description += "---------- \n"
-        description += "ground_truth : array, shape = [n_samples] \n"
-        description += "Ground truth (true labels represended as integers). \n"
-        description += "predictions : array, shape = [n_samples, n_classes] \n"
-        description += "Predicted probabilities. \n"
-        description += "k : int \n"
-        description += "Rank. \n"
-        description += " \n"
-        description += "Returns \n"
-        description += "------- \n"
-        description += "score : float \n"
-        description += " \n"
-        description += "Example \n"
-        description += "------- \n"
-        description += ">>> ground_truth = [1, 0, 2] \n"
-        description += ">>> predictions = [[0.15, 0.55, 0.2], [0.7, 0.2, 0.1], [0.06, 0.04, 0.9]] \n"
-        description += ">>> score = ndcg_score(ground_truth, predictions, k=2) \n"
-        description += "1.0 \n"
-        description += ">>> predictions = [[0.9, 0.5, 0.8], [0.7, 0.2, 0.1], [0.06, 0.04, 0.9]] \n"
-        description += ">>> score = ndcg_score(ground_truth, predictions, k=2) \n"
-        description += "0.6666666666 \n"
+        description = "Normalized discounted cumulative gain (NDCG) at rank K. <br>"
+        description += "Parameters <br>"
+        description += "---------- <br>"
+        description += "ground_truth : array, shape = [n_samples] <br>"
+        description += "Ground truth (true labels represended as integers). <br>"
+        description += "predictions : array, shape = [n_samples, n_classes] <br>"
+        description += "Predicted probabilities. <br>"
+        description += "k : int <br>"
+        description += "Rank. <br>"
+        description += " <br>"
+        description += "Returns <br>"
+        description += "------- <br>"
+        description += "score : float <br>"
+        description += " <br>"
+        description += "Example <br>"
+        description += "------- <br>"
+        description += ">>> ground_truth = [1, 0, 2] <br>"
+        description += ">>> predictions = [[0.15, 0.55, 0.2], [0.7, 0.2, 0.1], [0.06, 0.04, 0.9]] <br>"
+        description += ">>> score = ndcg_score(ground_truth, predictions, k=2) <br>"
+        description += "1.0 <br>"
+        description += ">>> predictions = [[0.9, 0.5, 0.8], [0.7, 0.2, 0.1], [0.06, 0.04, 0.9]] <br>"
+        description += ">>> score = ndcg_score(ground_truth, predictions, k=2) <br>"
+        description += "0.6666666666 <br>"
         return description
     if request.method == 'POST':
         """NDCG calculation on received data"""
         
-        request_json = jsonify(request.get_json(force=True))
+        request_json = request.get_json(force=True)
     
         ground_truth = request_json['ground_truth']
         predictions = request_json['predictions']
         k = request_json['k']
         score = ndcg_score(ground_truth, predictions, k)
-        
-        response_dict = {"ndcg_score",score}
     
-        return flask.jsonify(**response_dict)
+        return jsonify(ndcg_score=score)
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')
